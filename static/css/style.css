@@ -1,3 +1,6 @@
+/* ===============================
+   GLOBAL RESET
+================================= */
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +13,14 @@ body {
     color: #1f2937;
 }
 
+/* ===============================
+   NAVBAR
+================================= */
 .navbar {
     display: flex;
     justify-content: space-between;
-    padding: 20px 60px;
+    align-items: center;
+    padding: 20px 80px;
     background: white;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -24,15 +31,23 @@ body {
 }
 
 .nav-links a {
-    margin-left: 25px;
+    margin-left: 30px;
     text-decoration: none;
     color: #6b7280;
     font-weight: 500;
+    transition: 0.2s ease;
 }
 
+.nav-links a:hover {
+    color: #5b4fd4;
+}
+
+/* ===============================
+   HERO SECTION
+================================= */
 .hero {
     text-align: center;
-    padding: 100px 20px;
+    padding: 120px 20px;
 }
 
 .badge {
@@ -46,141 +61,95 @@ body {
 }
 
 .hero h1 {
-    font-size: 48px;
+    font-size: 52px;
     font-weight: 800;
     margin-bottom: 20px;
 }
 
 .hero p {
-    max-width: 650px;
+    max-width: 700px;
     margin: auto;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
     color: #6b7280;
+    font-size: 18px;
 }
 
+.hero-buttons {
+    margin-bottom: 60px;
+}
+
+/* ===============================
+   BUTTONS (WORKS FOR <a> + <button>)
+================================= */
+.btn-primary,
 .primary-btn {
     background: #5b4fd4;
     color: white;
     padding: 14px 28px;
     border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
     text-decoration: none;
-    margin-right: 15px;
+    display: inline-block;
+    transition: all 0.2s ease;
 }
 
+.btn-primary:hover,
+.primary-btn:hover {
+    background: #4c41c9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary,
 .secondary-btn {
     background: #e5e7eb;
     padding: 14px 28px;
     border-radius: 12px;
     text-decoration: none;
-    color: #1f2937;
+    color: #111827;
+    font-weight: 500;
+    display: inline-block;
+    transition: all 0.2s ease;
 }
 
+.btn-secondary:hover,
+.secondary-btn:hover {
+    background: #d1d5db;
+}
+
+/* ===============================
+   STATS
+================================= */
 .stats {
     display: flex;
     justify-content: center;
-    gap: 80px;
+    gap: 100px;
     margin-top: 60px;
 }
 
 .stats h2 {
-    font-size: 28px;
+    font-size: 32px;
+    font-weight: 700;
 }
 
-.form-container {
-    width: 400px;
-    margin: 80px auto;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+.stats span {
+    font-size: 14px;
+    color: #6b7280;
 }
 
-form input, form select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-}
-
-.dashboard-container {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 40px;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 250px;
-}
-
-/* PROFILE PAGE */
-
-.profile-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 80px 20px;
-}
-
-.profile-card {
-    width: 750px;
-    background: white;
-    padding: 50px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-.profile-card h2 {
-    font-size: 28px;
-    margin-bottom: 30px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.form-group input,
-.form-group select {
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    font-size: 15px;
-}
-
-.row {
-    display: flex;
-    gap: 20px;
-}
-
-.row .form-group {
-    flex: 1;
-}
-
-.button-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-}
-
-/* PAGE BACKGROUND */
+/* ===============================
+   PAGE WRAPPER
+================================= */
 .page-wrapper {
-    padding: 60px 20px;
+    padding: 80px 20px;
     background: #f3f4f6;
     min-height: 100vh;
 }
 
-/* PROGRESS STEPS */
+/* ===============================
+   PROGRESS STEPS
+================================= */
 .progress-container {
     display: flex;
     justify-content: center;
@@ -189,8 +158,8 @@ form input, form select {
 }
 
 .step {
-    width: 35px;
-    height: 35px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: #e5e7eb;
     display: flex;
@@ -200,7 +169,8 @@ form input, form select {
     color: #6b7280;
 }
 
-.step.active {
+.step.active,
+.step.completed {
     background: #5b4fd4;
     color: white;
 }
@@ -209,7 +179,7 @@ form input, form select {
     width: 60%;
     height: 6px;
     background: #e5e7eb;
-    margin: 0 auto 40px auto;
+    margin: 0 auto 50px auto;
     border-radius: 20px;
 }
 
@@ -219,22 +189,26 @@ form input, form select {
     border-radius: 20px;
 }
 
-/* PROFILE CARD */
+/* ===============================
+   PROFILE CARD
+================================= */
 .profile-card {
-    width: 800px;
+    width: 850px;
     margin: auto;
     background: white;
-    padding: 50px;
-    border-radius: 18px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    padding: 55px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .profile-card h2 {
     font-size: 28px;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
-/* FORM STYLING */
+/* ===============================
+   FORM ELEMENTS
+================================= */
 .profile-card label {
     font-weight: 600;
     display: block;
@@ -244,12 +218,13 @@ form input, form select {
 .profile-card input,
 .profile-card select {
     width: 100%;
-    padding: 15px;
-    margin-bottom: 25px;
+    padding: 16px;
+    margin-bottom: 28px;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     background: #f9fafb;
     font-size: 15px;
+    transition: all 0.2s ease;
 }
 
 .profile-card input:focus,
@@ -259,43 +234,88 @@ form input, form select {
     background: white;
 }
 
-/* ROW */
+/* Row layout */
 .row {
     display: flex;
-    gap: 20px;
+    gap: 25px;
 }
 
 .row div {
     flex: 1;
 }
 
-/* BUTTONS */
+/* Buttons row */
 .button-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
 }
 
-.btn-primary {
+/* ===============================
+   CHIP SYSTEM (FIXED HOVER)
+================================= */
+.chip-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.chip-container input {
+    display: none;
+}
+
+.chip {
+    padding: 14px 24px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* HOVER STATE */
+.chip:hover {
+    background: #ede9fe;
+    border-color: #5b4fd4;
+    color: #5b4fd4;
+}
+
+/* SELECTED STATE */
+.chip-container input:checked + .chip {
     background: #5b4fd4;
     color: white;
-    padding: 14px 28px;
-    border-radius: 12px;
     border: none;
-    cursor: pointer;
-    font-weight: 600;
 }
 
-.btn-secondary {
-    background: #e5e7eb;
-    padding: 14px 28px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #111827;
-    font-weight: 500;
+/* ===============================
+   DASHBOARD
+================================= */
+.dashboard-container {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    margin-top: 50px;
+    flex-wrap: wrap;
 }
 
-/* FLOATING CHAT */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    width: 260px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+}
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+/* ===============================
+   FLOATING CHAT BUTTON
+================================= */
 .chat-button {
     position: fixed;
     bottom: 30px;
@@ -309,7 +329,11 @@ form input, form select {
     justify-content: center;
     color: white;
     font-size: 22px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     cursor: pointer;
+    transition: 0.2s ease;
 }
 
+.chat-button:hover {
+    transform: scale(1.05);
+}

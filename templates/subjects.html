@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-wrapper">
+
+    <!-- STEP PROGRESS -->
+    <div class="progress-container">
+        <div class="step completed">✓</div>
+        <div class="step active">2</div>
+        <div class="step">3</div>
+        <div class="step">4</div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 50%;"></div>
+    </div>
+
+    <div class="profile-card">
+
+        <h2>Subjects & Goals</h2>
+
+        <form method="POST">
+
+            <label>Select Subjects</label>
+            <div class="chip-container">
+                <label class="chip">
+                    <input type="checkbox" name="subjects" value="Mathematics">
+                    Mathematics
+                </label>
+
+                <label class="chip">
+                    <input type="checkbox" name="subjects" value="Physics">
+                    Physics
+                </label>
+
+                <label class="chip">
+                    <input type="checkbox" name="subjects" value="Chemistry">
+                    Chemistry
+                </label>
+
+                <label class="chip">
+                    <input type="checkbox" name="subjects" value="Biology">
+                    Biology
+                </label>
+            </div>
+
+            <label>Learning Goal</label>
+            <select name="goal">
+                <option>Board Exam Preparation</option>
+                <option>JEE Preparation</option>
+                <option>NEET Preparation</option>
+                <option>Skill Improvement</option>
+            </select>
+
+            <div class="button-row">
+                <a href="/profile" class="btn-secondary">← Back</a>
+                <button type="submit" class="btn-primary">Continue →</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
