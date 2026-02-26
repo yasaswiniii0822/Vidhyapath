@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="profile-wrapper">
+    <div class="profile-card">
+
+        <h2>Your Profile</h2>
+
+        <form method="POST">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Enter your name" required>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Class</label>
+                    <select name="class">
+                        <option>Class 9</option>
+                        <option>Class 10</option>
+                        <option>Class 11</option>
+                        <option>Class 12</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Board</label>
+                    <select name="board">
+                        <option>CBSE</option>
+                        <option>ICSE</option>
+                        <option>State Board</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>School Name</label>
+                <input type="text" name="school" placeholder="Enter school name" required>
+            </div>
+
+            <div class="button-row">
+                <a href="/" class="secondary-btn">Back</a>
+                <button type="submit" class="primary-btn">Continue →</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

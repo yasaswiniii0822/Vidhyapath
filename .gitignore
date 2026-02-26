@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 instance/
 .env
+
+git add .
+git commit -m "Added profile page UI"
+git push

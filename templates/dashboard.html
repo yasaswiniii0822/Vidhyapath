@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 style="text-align:center; margin-top:50px;">Registered Students</h2>
+
+<div class="dashboard-container">
+    {% for user in users %}
+        <div class="card">
+            <h3>{{ user.full_name }}</h3>
+            <p>{{ user.student_class }} - {{ user.board }}</p>
+            <p>{{ user.school }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
