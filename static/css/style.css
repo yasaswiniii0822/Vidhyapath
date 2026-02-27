@@ -79,7 +79,7 @@ body {
 }
 
 /* ===============================
-   BUTTONS (WORKS FOR <a> + <button>)
+   BUTTONS (works for <a> + <button>)
 ================================= */
 .btn-primary,
 .primary-btn {
@@ -253,7 +253,7 @@ body {
 }
 
 /* ===============================
-   CHIP SYSTEM (FIXED HOVER)
+   CHIP SYSTEM (FINAL WORKING)
 ================================= */
 .chip-container {
     display: flex;
@@ -262,10 +262,12 @@ body {
     margin-bottom: 30px;
 }
 
+/* Hide checkbox */
 .chip-container input {
     display: none;
 }
 
+/* Default chip */
 .chip {
     padding: 14px 24px;
     border-radius: 999px;
@@ -276,18 +278,23 @@ body {
     transition: all 0.2s ease;
 }
 
-/* HOVER STATE */
+/* Hover (only if not selected) */
 .chip:hover {
     background: #ede9fe;
     border-color: #5b4fd4;
     color: #5b4fd4;
 }
 
-/* SELECTED STATE */
+/* Selected (stays purple) */
 .chip-container input:checked + .chip {
     background: #5b4fd4;
     color: white;
     border: none;
+}
+
+/* Hover when selected (slightly darker) */
+.chip-container input:checked + .chip:hover {
+    background: #4c41c9;
 }
 
 /* ===============================

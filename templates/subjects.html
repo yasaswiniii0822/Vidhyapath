@@ -22,26 +22,21 @@
         <form method="POST">
 
             <label>Select Subjects</label>
+
             <div class="chip-container">
-                <label class="chip">
-                    <input type="checkbox" name="subjects" value="Mathematics">
-                    Mathematics
-                </label>
 
-                <label class="chip">
-                    <input type="checkbox" name="subjects" value="Physics">
-                    Physics
-                </label>
+                <input type="checkbox" id="math" name="subjects" value="Mathematics">
+                <label for="math" class="chip">Mathematics</label>
 
-                <label class="chip">
-                    <input type="checkbox" name="subjects" value="Chemistry">
-                    Chemistry
-                </label>
+                <input type="checkbox" id="physics" name="subjects" value="Physics">
+                <label for="physics" class="chip">Physics</label>
 
-                <label class="chip">
-                    <input type="checkbox" name="subjects" value="Biology">
-                    Biology
-                </label>
+                <input type="checkbox" id="chemistry" name="subjects" value="Chemistry">
+                <label for="chemistry" class="chip">Chemistry</label>
+
+                <input type="checkbox" id="biology" name="subjects" value="Biology">
+                <label for="biology" class="chip">Biology</label>
+
             </div>
 
             <label>Learning Goal</label>
