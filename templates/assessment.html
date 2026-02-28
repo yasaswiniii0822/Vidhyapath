@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-wrapper">
+
+    <!-- Progress Steps -->
+    <div class="progress-container">
+        <div class="step completed">✓</div>
+        <div class="step completed">✓</div>
+        <div class="step active">3</div>
+        <div class="step">4</div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 75%;"></div>
+    </div>
+
+    <div class="profile-card">
+
+        <h2>Quick Assessment</h2>
+
+        <p class="assessment-intro">
+            Let’s understand your strengths and areas for improvement.
+            Answer honestly — this helps us build your personalized learning plan.
+        </p>
+
+        <form method="POST">
+
+            {% if questions|length == 0 %}
+                <p>No questions available for selected goal and subjects.</p>
+            {% endif %}
+
+            {% for q in questions %}
+                <div class="question-block">
+                    <p><strong>{{ loop.index }}. {{ q.question }}</strong></p>
+
+                    {% for option in q.options %}
+                        <div class="option">
+                            <input type="radio"
+                                   name="{{ q.id }}"
+                                   value="{{ option }}"
+                                   id="{{ q.id }}{{ loop.index }}">
+                            <label for="{{ q.id }}{{ loop.index }}">
+                                {{ option }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="button-row">
+                <a href="/subjects" class="btn-secondary">← Back</a>
+                <button type="submit" class="btn-primary">Submit →</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
