@@ -1,16 +1,103 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2 style="text-align:center; margin-top:50px;">Registered Students</h2>
-
 <div class="dashboard-container">
-    {% for user in users %}
-        <div class="card">
-            <h3>{{ user.full_name }}</h3>
-            <p>{{ user.student_class }} - {{ user.board }}</p>
-            <p>{{ user.school }}</p>
+
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Your personalized learning overview</p>
+    </div>
+
+    <!-- =========================
+         PROGRESS TRACKING
+    ========================== -->
+
+    <div class="progress-section">
+        <h3>Performance Progress</h3>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill"
+                 style="width: {{ score }}%;">
+            </div>
         </div>
-    {% endfor %}
+
+        <p class="progress-text">
+            Current Score: {{ score }}%
+        </p>
+
+        {% if improvement > 0 %}
+            <p class="improve positive">
+                Improved by +{{ improvement }}%
+            </p>
+        {% elif improvement < 0 %}
+            <p class="improve negative">
+                Decreased by {{ improvement }}%
+            </p>
+        {% else %}
+            <p class="improve neutral">
+                No change yet
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- =========================
+         MAIN DASHBOARD GRID
+    ========================== -->
+
+    <div class="dashboard-main">
+
+        <!-- LEFT CARD -->
+        <div class="dashboard-card performance-card">
+            <div class="score-number">{{ score }}%</div>
+            <p class="muted">Overall Performance</p>
+
+            <div class="divider"></div>
+
+            <p><strong>Level:</strong> {{ rec_data.level }}</p>
+        </div>
+
+        <!-- RIGHT CARD -->
+        <div class="dashboard-card focus-card">
+            <h2>Recommended Focus Areas</h2>
+
+            {% if rec_data.recommendations|length == 0 %}
+                <p class="good-msg">
+                    You're performing well across selected topics.
+                </p>
+            {% else %}
+
+                {% for r in rec_data.recommendations %}
+                    <div class="focus-item">
+
+                        <div class="focus-header">
+                            <h4>{{ r.topic }}</h4>
+                            <span class="priority {{ r.priority | lower }}">
+                                {{ r.priority }}
+                            </span>
+                        </div>
+
+                        <p>{{ r.suggestion }}</p>
+
+                        {% if r.url %}
+                            <a href="{{ r.url }}" 
+                               target="_blank" 
+                               class="yt-link">
+                                Watch on YouTube ({{ r.channel }})
+                            </a>
+                        {% endif %}
+
+                        {% if r.estimated_time %}
+                            <small>{{ r.estimated_time }}</small>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+            {% endif %}
+        </div>
+
+    </div>
+
 </div>
 
 {% endblock %}

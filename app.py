@@ -1,24 +1,80 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+import json
+import os
+import requests
+
+YOUTUBE_API_KEY = os.getenv("AIzaSyC-HsdrLuy9XMv2Ghd4tYpyR6LPJEo6kis")
+# ======================
+# APP CONFIG
+# ======================
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"
 
-# ======================
-# DATABASE CONFIG
-# ======================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vidyapath.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # ======================
-# QUESTION BANK
+# STATIC YOUTUBE COURSES
 # ======================
 
-QUESTION_BANK = {
+YOUTUBE_COURSES = {
+    "Linear Equations": {
+        "title": "Linear Equations - Full Concept",
+        "channel": "Khan Academy",
+        "url": "https://youtu.be/bAerID24QJ0?si=2gHrN0znAoApclhB"
+    },
+    "Squares": {
+        "title": "Squares & Square Roots",
+        "channel": "Khan Academy",
+        "url": "https://youtu.be/mbc3_e5lWw0?si=XPQBcnWTM3Nw6FYL"
+    },
+    "Trigonometry": {
+        "title": "Trigonometry Basics",
+        "channel": "Physics Wallah",
+        "url": "https://youtu.be/anqu3ul9WiI?si=ggWTLI2pfEw0Me8A"
+    },
+    "Motion": {
+        "title": "Motion in One Dimension",
+        "channel": "Physics Wallah",
+        "url": "https://youtu.be/XIJAZM5G5Fg?si=YVIFDXMtG4TDqa_6"
+    },
+    "Newton's Laws": {
+        "title": "Laws of Motion Explained",
+        "channel": "The Organic Chemistry Tutor",
+        "url": "https://youtu.be/g550H4e5FCY?si=WLTiGFYN3eXrLdZV"
+    },
+    "Atomic Structure": {
+        "title": "Atomic Structure Complete",
+        "channel": "Unacademy",
+        "url": "https://www.youtube.com/live/fk_6SGKjXqI?si=_EOtyW-g6dTsQmSY"
+    },
+    "Acids & Bases": {
+        "title": "pH & Acids Explained",
+        "channel": "Khan Academy",
+        "url": "https://youtu.be/J7-GewgqWUQ?si=U8o5OAsnAZB-wKjH"
+    },
+    "Cell Organelles": {
+        "title": "Cell Organelles Explained",
+        "channel": "Nucleus medical media",
+        "url": "https://youtu.be/rKS-vvhMV6E?si=n1uufH4XsuEWmyfP"
+    },
+    "Photosynthesis": {
+        "title": "Photosynthesis Process",
+        "channel": "Amoeba Sisters",
+        "url": "https://youtu.be/CMiPYHNNg28?si=bYAt2BViL9ujgLE5"
+    }
+}
 
+# ======================
+# QUESTION BANK
+# ======================
+#787813084612-86usm9tqvk5gr53773dg4lj4q8c40ubd.apps.googleusercontent.com
+QUESTION_BANK = {    
     "Board Exam Preparation": {
-
         "Mathematics": [
             {
                 "id": "math1",
@@ -42,7 +98,6 @@ QUESTION_BANK = {
                 "topic": "Trigonometry"
             }
         ],
-
         "Physics": [
             {
                 "id": "phy1",
@@ -50,16 +105,8 @@ QUESTION_BANK = {
                 "options": ["Constant", "Zero", "Increasing", "Decreasing"],
                 "answer": "Zero",
                 "topic": "Motion"
-            },
-            {
-                "id": "phy2",
-                "question": "Force on 3kg mass accelerating at 2 m/s²?",
-                "options": ["6N", "5N", "1N", "9N"],
-                "answer": "6N",
-                "topic": "Newton's Laws"
             }
         ],
-
         "Chemistry": [
             {
                 "id": "chem1",
@@ -67,16 +114,8 @@ QUESTION_BANK = {
                 "options": ["Neutrons", "Protons", "Mass", "Electrons only"],
                 "answer": "Protons",
                 "topic": "Atomic Structure"
-            },
-            {
-                "id": "chem2",
-                "question": "pH of neutral solution?",
-                "options": ["0", "7", "14", "1"],
-                "answer": "7",
-                "topic": "Acids & Bases"
             }
         ],
-
         "Biology": [
             {
                 "id": "bio1",
@@ -84,26 +123,6 @@ QUESTION_BANK = {
                 "options": ["Nucleus", "Mitochondria", "Ribosome", "Golgi"],
                 "answer": "Mitochondria",
                 "topic": "Cell Organelles"
-            },
-            {
-                "id": "bio2",
-                "question": "Green pigment in plants?",
-                "options": ["Chlorophyll", "Hemoglobin", "Melanin", "Keratin"],
-                "answer": "Chlorophyll",
-                "topic": "Photosynthesis"
-            }
-        ]
-
-    },
-
-    "NEET Preparation": {
-        "Biology": [
-            {
-                "id": "neet_bio1",
-                "question": "Which organelle produces ATP?",
-                "options": ["Nucleus", "Mitochondria", "Ribosome", "Golgi Body"],
-                "answer": "Mitochondria",
-                "topic": "Cell Biology"
             }
         ]
     }
@@ -134,7 +153,116 @@ class Assessment(db.Model):
     subject = db.Column(db.String(100))
     score = db.Column(db.Integer)
     weak_area = db.Column(db.String(200))
+    subject_breakdown = db.Column(db.Text)
 
+# ======================
+# RECOMMENDATION ENGINE
+# ======================
+
+def fetch_youtube_videos(query, max_results=3):
+
+    if not YOUTUBE_API_KEY:
+        return []  # Safe fallback if API key missing
+
+    url = "https://www.googleapis.com/youtube/v3/search"
+
+    params = {
+        "part": "snippet",
+        "q": query,
+        "type": "video",
+        "maxResults": max_results,
+        "key": YOUTUBE_API_KEY
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        videos = []
+
+        for item in data.get("items", []):
+            video_id = item["id"]["videoId"]
+            snippet = item["snippet"]
+
+            videos.append({
+                "title": snippet["title"],
+                "channel": snippet["channelTitle"],
+                "thumbnail": snippet["thumbnails"]["medium"]["url"],
+                "url": f"https://www.youtube.com/watch?v={video_id}"
+            })
+
+        return videos
+
+    except Exception as e:
+        print("YouTube API Error:", e)
+        return []
+
+def generate_recommendations(score, weak_topics, breakdown):
+
+    recommendations = []
+
+    # Determine overall level
+    if score >= 80:
+        level = "Advanced"
+    elif score >= 60:
+        level = "Intermediate"
+    else:
+        level = "Beginner"
+
+    # Subject-level summary
+    for subject, data in breakdown.items():
+
+        subject_percentage = data.get("percentage", 0)
+
+        if subject_percentage < 50:
+            priority = "High"
+        elif subject_percentage < 75:
+            priority = "Medium"
+        else:
+            priority = "Low"
+
+        recommendations.append({
+            "topic": subject,
+            "priority": priority,
+            "suggestion": f"{subject} performance: {subject_percentage}%",
+            "estimated_time": None,
+            "url": None,
+            "channel": None,
+            "thumbnail": None
+        })
+
+    # Topic-level YouTube recommendations
+    for topic in weak_topics:
+
+        api_videos = fetch_youtube_videos(topic + " tutorial")
+
+        if api_videos:
+            for video in api_videos:
+                recommendations.append({
+                    "topic": topic,
+                    "priority": "High",
+                    "suggestion": video["title"],
+                    "estimated_time": "YouTube Lesson",
+                    "url": video["url"],
+                    "channel": video["channel"],
+                    "thumbnail": video["thumbnail"]
+                })
+        else:
+            # Optional fallback if API fails
+            recommendations.append({
+                "topic": topic,
+                "priority": "High",
+                "suggestion": f"Revise {topic} concepts",
+                "estimated_time": "1–2 hours",
+                "url": None,
+                "channel": None,
+                "thumbnail": None
+            })
+
+    return {
+        "level": level,
+        "recommendations": recommendations
+    }
 
 # ======================
 # ROUTES
@@ -156,6 +284,8 @@ def profile():
         )
         db.session.add(new_user)
         db.session.commit()
+
+        session["user_id"] = new_user.id
         return redirect("/subjects")
 
     return render_template("profile.html")
@@ -164,11 +294,16 @@ def profile():
 @app.route("/subjects", methods=["GET", "POST"])
 def subjects():
     if request.method == "POST":
+
+        user_id = session.get("user_id")
+        if not user_id:
+            return redirect("/profile")
+
         selected_subjects = request.form.getlist("subjects")
         goal = request.form["goal"]
 
         profile = LearningProfile(
-            user_id=1,
+            user_id=user_id,
             subjects=",".join(selected_subjects),
             goal=goal
         )
@@ -184,7 +319,13 @@ def subjects():
 @app.route("/assessment", methods=["GET", "POST"])
 def assessment():
 
-    learning_profile = LearningProfile.query.order_by(LearningProfile.id.desc()).first()
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/profile")
+
+    learning_profile = LearningProfile.query.filter_by(
+        user_id=user_id
+    ).order_by(LearningProfile.id.desc()).first()
 
     if not learning_profile:
         return redirect("/subjects")
@@ -201,27 +342,25 @@ def assessment():
 
     if request.method == "POST":
 
-        if len(questions_to_ask) == 0:
-            return redirect("/subjects")
-
-        score = 0
+        total_questions = len(questions_to_ask)
+        correct = 0
         weak_topics = []
 
         for q in questions_to_ask:
             user_answer = request.form.get(q["id"])
-
             if user_answer == q["answer"]:
-                score += 1
+                correct += 1
             else:
                 weak_topics.append(q["topic"])
 
-        final_score = int((score / len(questions_to_ask)) * 100)
+        final_score = int((correct / total_questions) * 100) if total_questions else 0
 
         new_assessment = Assessment(
-            user_id=1,
+            user_id=user_id,
             subject=",".join(subjects),
             score=final_score,
-            weak_area=", ".join(set(weak_topics))
+            weak_area=", ".join(set(weak_topics)),
+            subject_breakdown=json.dumps({})
         )
 
         db.session.add(new_assessment)
@@ -234,12 +373,54 @@ def assessment():
 
 @app.route("/dashboard")
 def dashboard():
-    users = User.query.all()
-    return render_template("dashboard.html", users=users)
 
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/profile")
+
+    # Get ALL assessments for user
+    assessments = Assessment.query.filter_by(
+        user_id=user_id
+    ).order_by(Assessment.id.asc()).all()
+
+    if not assessments:
+        return redirect("/profile")
+
+    latest_assessment = assessments[-1]
+
+    score = latest_assessment.score
+    weak_topics = (
+        latest_assessment.weak_area.split(", ")
+        if latest_assessment.weak_area
+        else []
+    )
+
+    subject_breakdown = json.loads(
+        latest_assessment.subject_breakdown
+        if latest_assessment.subject_breakdown
+        else "{}"
+    )
+
+    rec_data = generate_recommendations(score, weak_topics, subject_breakdown)
+
+    # Progress calculation
+    scores_history = [a.score for a in assessments]
+    improvement = 0
+
+    if len(scores_history) > 1:
+        improvement = scores_history[-1] - scores_history[0]
+
+    return render_template(
+        "dashboard.html",
+        score=score,
+        rec_data=rec_data,
+        breakdown=subject_breakdown,
+        scores_history=scores_history,
+        improvement=improvement
+    )
 
 # ======================
-# RUN APP
+# RUN
 # ======================
 
 if __name__ == "__main__":
