@@ -4,11 +4,8 @@ import json
 import os
 import requests
 
-YOUTUBE_API_KEY = os.getenv("AIzaSyC-HsdrLuy9XMv2Ghd4tYpyR6LPJEo6kis")
-# ======================
-# APP CONFIG
-# ======================
-
+YOUTUBE_API_KEY = os.getenv("YT_API_KEY")
+print("YT KEY:", YOUTUBE_API_KEY)
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -16,10 +13,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vidyapath.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
-# ======================
-# STATIC YOUTUBE COURSES
-# ======================
 
 YOUTUBE_COURSES = {
     "Linear Equations": {
@@ -69,10 +62,7 @@ YOUTUBE_COURSES = {
     }
 }
 
-# ======================
-# QUESTION BANK
-# ======================
-#787813084612-86usm9tqvk5gr53773dg4lj4q8c40ubd.apps.googleusercontent.com
+
 QUESTION_BANK = {    
     "Board Exam Preparation": {
         "Mathematics": [
@@ -128,10 +118,6 @@ QUESTION_BANK = {
     }
 }
 
-# ======================
-# DATABASE MODELS
-# ======================
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100))
@@ -139,14 +125,11 @@ class User(db.Model):
     board = db.Column(db.String(20))
     school = db.Column(db.String(100))
 
-
 class LearningProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     subjects = db.Column(db.String(200))
     goal = db.Column(db.String(100))
-
-
 class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
@@ -155,14 +138,11 @@ class Assessment(db.Model):
     weak_area = db.Column(db.String(200))
     subject_breakdown = db.Column(db.Text)
 
-# ======================
-# RECOMMENDATION ENGINE
-# ======================
-
 def fetch_youtube_videos(query, max_results=3):
+    
 
     if not YOUTUBE_API_KEY:
-        return []  # Safe fallback if API key missing
+        return []  
 
     url = "https://www.googleapis.com/youtube/v3/search"
 
@@ -173,7 +153,6 @@ def fetch_youtube_videos(query, max_results=3):
         "maxResults": max_results,
         "key": YOUTUBE_API_KEY
     }
-
     try:
         response = requests.get(url, params=params)
         data = response.json()
@@ -201,7 +180,6 @@ def generate_recommendations(score, weak_topics, breakdown):
 
     recommendations = []
 
-    # Determine overall level
     if score >= 80:
         level = "Advanced"
     elif score >= 60:
@@ -209,50 +187,26 @@ def generate_recommendations(score, weak_topics, breakdown):
     else:
         level = "Beginner"
 
-    # Subject-level summary
-    for subject, data in breakdown.items():
-
-        subject_percentage = data.get("percentage", 0)
-
-        if subject_percentage < 50:
-            priority = "High"
-        elif subject_percentage < 75:
-            priority = "Medium"
-        else:
-            priority = "Low"
-
-        recommendations.append({
-            "topic": subject,
-            "priority": priority,
-            "suggestion": f"{subject} performance: {subject_percentage}%",
-            "estimated_time": None,
-            "url": None,
-            "channel": None,
-            "thumbnail": None
-        })
-
-    # Topic-level YouTube recommendations
     for topic in weak_topics:
 
-        api_videos = fetch_youtube_videos(topic + " tutorial")
+        videos = fetch_youtube_videos(topic + " class 12 tutorial")
 
-        if api_videos:
-            for video in api_videos:
+        if videos:
+            for video in videos:
                 recommendations.append({
                     "topic": topic,
                     "priority": "High",
                     "suggestion": video["title"],
-                    "estimated_time": "YouTube Lesson",
+                    "estimated_time": "Video Lesson",
                     "url": video["url"],
                     "channel": video["channel"],
                     "thumbnail": video["thumbnail"]
                 })
         else:
-            # Optional fallback if API fails
             recommendations.append({
                 "topic": topic,
                 "priority": "High",
-                "suggestion": f"Revise {topic} concepts",
+                "suggestion": f"Revise {topic}",
                 "estimated_time": "1–2 hours",
                 "url": None,
                 "channel": None,
@@ -263,10 +217,6 @@ def generate_recommendations(score, weak_topics, breakdown):
         "level": level,
         "recommendations": recommendations
     }
-
-# ======================
-# ROUTES
-# ======================
 
 @app.route("/")
 def home():
@@ -346,21 +296,41 @@ def assessment():
         correct = 0
         weak_topics = []
 
+        subject_scores = {}
+
+        for subject in subjects:
+            subject_scores[subject] = {"correct": 0, "total": 0}
+
         for q in questions_to_ask:
+
             user_answer = request.form.get(q["id"])
-            if user_answer == q["answer"]:
-                correct += 1
-            else:
-                weak_topics.append(q["topic"])
+
+            for subject in subjects:
+                if q in QUESTION_BANK[goal].get(subject, []):
+                    subject_scores[subject]["total"] += 1
+
+                    if user_answer == q["answer"]:
+                        correct += 1
+                        subject_scores[subject]["correct"] += 1
+                    else:
+                        weak_topics.append(q["topic"])
 
         final_score = int((correct / total_questions) * 100) if total_questions else 0
+
+        for subject in subject_scores:
+            total = subject_scores[subject]["total"]
+            correct_sub = subject_scores[subject]["correct"]
+
+            subject_scores[subject]["percentage"] = (
+                int((correct_sub / total) * 100) if total else 0
+            )
 
         new_assessment = Assessment(
             user_id=user_id,
             subject=",".join(subjects),
             score=final_score,
             weak_area=", ".join(set(weak_topics)),
-            subject_breakdown=json.dumps({})
+            subject_breakdown=json.dumps(subject_scores)
         )
 
         db.session.add(new_assessment)
@@ -403,7 +373,7 @@ def dashboard():
 
     rec_data = generate_recommendations(score, weak_topics, subject_breakdown)
 
-    # Progress calculation
+    
     scores_history = [a.score for a in assessments]
     improvement = 0
 
@@ -419,9 +389,6 @@ def dashboard():
         improvement=improvement
     )
 
-# ======================
-# RUN
-# ======================
 
 if __name__ == "__main__":
     with app.app_context():
